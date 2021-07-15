@@ -2,6 +2,9 @@ package updater;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.Paths;
+
 //import java.io.InputStream;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -350,6 +353,16 @@ public class Updater extends Application {
    * @since 1.0
    */
   public static void main(String[] args) {
+    try {
+      String path = Paths.get("").toAbsolutePath().toString();
+      path = path.concat(File.separator + "Logs" + File.separator);
+      File f = new File(path);
+      f.mkdir();
+      System.setOut(new PrintStream(new File(path + "UpdaterLogFile.txt")));
+      System.setErr(new PrintStream(new File(path + "UpdaterErrorLogs.txt")));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     Updater.launch(args);
   }
 }
