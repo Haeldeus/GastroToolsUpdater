@@ -1,0 +1,41 @@
+.root {
+  -fx-font: 11px Tahoma;
+  -fx-font-weight: bold;
+  -fx-background-color: rgb(31,34,61);
+}
+.progress-indicator {
+  -fx-accent: #ab7676;
+}
+.progress-indicator > .determinate-indicator > .percentage {
+	-fx-fill: rgb(171,118,118);
+}
+.progress-indicator > .determinate-indicator > .indicator {
+	-fx-background-color: black, black, black, #d3d3d3;
+}
+#text {
+  -fx-fill: rgb(171,118,118);
+}
+.button {
+  -fx-text-fill: rgb(171,118,118);
+  -fx-background-color: #090a0c;
+}
+.label {
+  -fx-text-fill: rgb(171,118,118);
+}
+.menu {
+  -fx-background-color: rgb(31,34,100);
+}
+.menu-bar {
+  -fx-background-color: rgb(31,34,100);
+}
+.context-menu {
+  -fx-background-color: rgb(50,34,100);
+}
+.menu-bar > .container > .menu-button:hover,
+.menu-bar > .container > .menu-button:focused,
+.menu-bar > .container > .menu-button:showing {
+  -fx-background-color: #455a64;
+}
+.menu-item:focused .label, .menu-item:hovered .label {
+  -fx-text-fill: #FFFFFF;
+}

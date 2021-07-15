@@ -3,7 +3,6 @@ package updater;
 import java.io.File;
 import java.io.IOException;
 //import java.io.InputStream;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -78,8 +77,7 @@ public class Updater extends Application {
      * the primaryStage to the User.
      */
     Scene scene = new Scene(this.bp, 600, 250);
-    //TODO: Add Stylesheet
-    //scene.getStylesheets().add(Util.getControlStyle());
+    scene.getStylesheets().add("controlStyle1.css");
     primary.setScene(scene);
     primary.setMinHeight(270);
     primary.setMinWidth(620);
