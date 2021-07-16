@@ -101,6 +101,15 @@ public class DownloadTask extends Task<Void> {
      */
     String p = outputFile.getAbsolutePath().substring(0, 
         outputFile.getAbsolutePath().lastIndexOf(File.separator) + 1);
+    /*
+     * Checking, if the Path exists. If not, it will be created.
+     */
+    File path = new File(p);
+    if (!path.exists()) {
+      UpdaterUtil.log("Creating Folder " + p.substring(p.substring(0, 
+          p.length() - 1).lastIndexOf(File.separator), p.length()));
+      path.mkdirs();
+    }
     UpdaterUtil.log("File located in Folder " + p);
     
     /*
@@ -181,7 +190,7 @@ public class DownloadTask extends Task<Void> {
     }
     
     if (deleteFile) {
-      UpdaterUtil.log("Deleting File...");
+      UpdaterUtil.log("Deleting temporary File if existing...");
       tmpFile.delete();
     }
     /*
