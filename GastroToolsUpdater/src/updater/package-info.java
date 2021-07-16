@@ -3,6 +3,6 @@
  * is available.
 
  * @author Haeldeus
- * @version 1.0
+ * @version {@value updater.Updater#version}
  */
 package updater;

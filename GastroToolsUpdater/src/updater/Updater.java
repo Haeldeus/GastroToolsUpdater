@@ -15,9 +15,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import tasks.DownloadTask;
 import tasks.ProgressTask;
@@ -28,14 +30,14 @@ import util.UpdaterUtil;
  * from this Thread.
 
  * @author Haeldeus
- * @version 1.0
+ * @version {@value #version}
  */
 public class Updater extends Application {
 
   /**
    * The Version of this Updater. Only used to keep Track of the Progress at the Moment.
    */
-  public static final String version = "1.01";
+  public static final String version = "1.02";
   
   /**
    * The primary Stage, this Application is running on.
@@ -69,6 +71,13 @@ public class Updater extends Application {
   
   @Override
   public void start(Stage primaryStage) throws Exception {
+    /*
+     * Makes the Window that will display this Scene undecorated, so there is no OS-Border. 
+     * Also adds the Icon of this Application, so it can be displayed in the Task Bar instead of 
+     * the default Java Icon.
+     */
+    primaryStage.initStyle(StageStyle.UNDECORATED);
+    primaryStage.getIcons().add(new Image("/res/GTIcon.png"));
     UpdaterUtil.log("Version used: " + version);
     /*
      * Sets all immediately needed Fields to their default values.
@@ -217,7 +226,7 @@ public class Updater extends Application {
         /*
          * Adds the Updater Label to the Grid.
          */
-        grid.add(updaterLabel, 0, 0, 2, 1);
+        grid.add(updaterLabel, 0, 0, 3, 1);
         /*
          * Creates a new Button to start updating and adds it to the Grid.
          */
@@ -250,6 +259,19 @@ public class Updater extends Application {
           }
         });
         grid.add(btStart, 1, 1);
+        
+        /*
+         * Creates a Button to exit the Application.
+         */
+        Button btExit = new Button("Beenden");
+        btExit.setOnAction(new EventHandler<ActionEvent>() {
+          @Override
+          public void handle(ActionEvent event) {
+            UpdaterUtil.log("Exiting the Application manually!");
+            System.exit(0);
+          }
+        });
+        grid.add(btExit, 2, 1);
         grid.setAlignment(Pos.CENTER);
         bp.setCenter(grid);
       }      

@@ -8,7 +8,7 @@ import java.time.ZonedDateTime;
  * A Utility Class, that provides basic Methods for all Classes in the Updater.
 
  * @author Haeldeus
- * @version 1.0
+ * @version {@value updater.Updater#version}
  */
 public class UpdaterUtil {
 

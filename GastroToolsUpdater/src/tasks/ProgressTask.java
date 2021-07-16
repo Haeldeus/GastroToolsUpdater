@@ -17,7 +17,7 @@ import util.UpdaterUtil;
  * ProgressIndicator of the Updater Class.
 
  * @author Haeldeus
- * @version 1.0
+ * @version {@value updater.Updater#version}
  */
 public class ProgressTask extends Task<Void> {
   

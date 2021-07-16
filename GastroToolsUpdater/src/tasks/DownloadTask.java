@@ -27,7 +27,7 @@ import util.UpdaterUtil;
  * downloaded.
 
  * @author Haeldeus
- * @version 1.0
+ * @version {@value updater.Updater#version}
  */
 public class DownloadTask extends Task<Void> {
 

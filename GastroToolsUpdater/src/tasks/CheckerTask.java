@@ -18,7 +18,7 @@ import util.UpdaterUtil;
  * The Task, that will check, if a new Version of the Launcher was released.
 
  * @author Haeldeus
- * @version 1.0
+ * @version {@value updater.Updater#version}
  */
 public class CheckerTask extends Task<Void> {
 
