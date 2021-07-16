@@ -69,6 +69,7 @@ public class Updater extends Application {
   
   @Override
   public void start(Stage primaryStage) throws Exception {
+    UpdaterUtil.log("Version used: " + version);
     /*
      * Sets all immediately needed Fields to their default values.
      */
