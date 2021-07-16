@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Paths;
-
-//import java.io.InputStream;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -23,15 +21,22 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import tasks.DownloadTask;
 import tasks.ProgressTask;
+import util.UpdaterUtil;
 
 /**
  * The Updater MainClass. Here, the Frame will be configured and all other Tasks will be started 
  * from this Thread.
+
  * @author Haeldeus
  * @version 1.0
  */
 public class Updater extends Application {
 
+  /**
+   * The Version of this Updater. Only used to keep Track of the Progress at the Moment.
+   */
+  public static final String version = "1.0";
+  
   /**
    * The primary Stage, this Application is running on.
    */
@@ -68,6 +73,7 @@ public class Updater extends Application {
      * Sets all immediately needed Fields to their default values.
      */
     file = new File(System.getProperty("user.dir") + "/app/Launcher.jar");
+    UpdaterUtil.log("Set new File to " + file.getAbsolutePath());
     this.primary = primaryStage;
     this.bp = new BorderPane();
     this.pi = new ProgressIndicator();
@@ -91,6 +97,7 @@ public class Updater extends Application {
   /**
    * Starts the ProgressTask. That Task will check for Updates via a new CheckerTask and update the 
    * progressIndicator and updaterLabel.
+
    * @see ProgressTask
    * @since 1.0
    */
@@ -111,6 +118,7 @@ public class Updater extends Application {
      */
     ProgressTask pt = new ProgressTask(this, this.updaterLabel);
     this.pi.progressProperty().bind(pt.progressProperty());
+    UpdaterUtil.log("Starting UpdateTask");
     new Thread(pt).start();
   }
   
@@ -119,9 +127,11 @@ public class Updater extends Application {
    * - The Version File was not found. <br>
    * - The Connection to the Website with the version Number couldn't be established. <br>
    * - The Task was interrupted (either User-Side or by timing out).
+
    * @since 1.0
    */
   public void showUpdateFailed() {
+    UpdaterUtil.log("Update failed!");
     /*
      * Since all following instructions alter the Stage of the Application, this has to be done via 
      * a new Runnable.
@@ -182,9 +192,11 @@ public class Updater extends Application {
   /**
    * Displays a Message to the User, that an Update is needed and adds Buttons to start updating or 
    * ignoring the Update.
+
    * @since 1.0
    */
   public void showUpdateNeeded() {
+    UpdaterUtil.log("Update needed!");
     /*
      * Since all following instructions alter the Stage of the Application, this has to be done via 
      * a new Runnable.
@@ -246,9 +258,11 @@ public class Updater extends Application {
   /**
    * Starts to update the Launcher via DownloadTask. Displays some Labels to the User, which 
    * contain some information about the Performance.
+
    * @since 1.0
    */
   private void startUpdate() {
+    UpdaterUtil.log("Starting to update the Launcher...");
     /*
      * Resets the BorderPane, since all former Nodes aren't needed in this step.
      */
@@ -272,6 +286,9 @@ public class Updater extends Application {
     /*
      * Creates the DownloadTask with the needed Parameters.
      */
+    UpdaterUtil.log("Creating new DownloadTask to download from: " 
+        + "https://github.com/Haeldeus/GastroToolsLauncher/releases/download/v" + latestVersion 
+        + "/Launcher.jar");
     DownloadTask task = 
         new DownloadTask("https://github.com/Haeldeus/GastroToolsLauncher/releases/download/v" 
         + latestVersion + "/Launcher.jar", file, updates, length, latestVersion);
@@ -294,6 +311,7 @@ public class Updater extends Application {
     /*
      * Starts the DownloadTask.
      */
+    UpdaterUtil.log("Starting DownloadTask");
     new Thread(task).start();
     /*
      * Adds a new EventHandler to the onCloseRequest to cancel the Update, when the User closes the 
@@ -313,24 +331,17 @@ public class Updater extends Application {
   
   /**
    * Starts the Launcher without updating it.
+
    * @since 1.0
    */
   public void startWithoutUpdate() {
     try {
+      UpdaterUtil.log("Starting Launcher...");
       /*
        *  Run a java application in a separate system process
        */
-      //Process proc = Runtime.getRuntime().exec("java -jar " + file.getPath());
-      System.out.println("working dir: " + file.getPath().substring(0, 
-          file.getPath().lastIndexOf(File.separator)));
       Runtime.getRuntime().exec("java -jar " + file.getPath(), null, 
           new File(file.getPath().substring(0, file.getPath().lastIndexOf(File.separator))));
-      
-      /*
-       *  Then retrieve the process output
-       */
-      //InputStream in = proc.getInputStream();
-      //InputStream err = proc.getErrorStream();
       System.exit(0);
     } catch (IOException e) {
       e.printStackTrace();
@@ -339,8 +350,9 @@ public class Updater extends Application {
   
   /**
    * Sets the {@link #latestVersion}-Field to the given String.
+
    * @param version The latest found Version. If no version was found, this has to be set to 
-   * {@code "FAILED"}.
+   *     {@code "FAILED"}.
    * @since 1.0
    */
   public void setLatestVersion(String version) {
@@ -349,6 +361,7 @@ public class Updater extends Application {
   
   /**
    * The Main-Method to start this Application.
+
    * @param args  Unused.
    * @since 1.0
    */

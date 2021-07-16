@@ -6,15 +6,16 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.Label;
 import updater.Updater;
+import util.UpdaterUtil;
 
 /**
  * The Task, that will start the CheckerTask to check for Updates. This Task will also update the 
  * ProgressIndicator of the Updater Class.
+
  * @author Haeldeus
  * @version 1.0
  */
@@ -53,6 +54,7 @@ public class ProgressTask extends Task<Void> {
   
   /**
    * The Constructor for this Task. Sets all immediately needed Fields to the given Values.
+
    * @param primary The Updater, which called this Task.
    * @param updates The Label, that will display update Message to the User.
    * @since 1.0
@@ -70,18 +72,23 @@ public class ProgressTask extends Task<Void> {
      * Updates the Indicator with 1 and a Message, that the Files needed are loading. Increments 
      * index afterwards.
      */
+    UpdaterUtil.log("Loading Files...");
     updateIndicator(index, "Lade Dateien...");
     index++;
     /*
      * Loads the version File. If the File doesn't exist, the following try-Block will cause an 
      * FileNotFoundException, which will be caught and the User gets informed about this Error.
      */
-    File version = new File(System.getProperty("user.dir") + "/app/Version.txt");
+    String versionPath = System.getProperty("user.dir").concat(File.separator + "app" 
+        + File.separator + "Version.txt");
+    UpdaterUtil.log("versionFile at " + versionPath);
+    File version = new File(versionPath);
     try {
       /*
        * Updates the Indicator with 2 and a Message, that the currently installed Version is 
        * checked. Increments index afterwards.
        */
+      UpdaterUtil.log("Checking installed Version...");
       updateIndicator(index, "Überprüfe installierte Version...");
       index++;
       /*
@@ -101,12 +108,15 @@ public class ProgressTask extends Task<Void> {
          * If the Version-File doesn't exist, vers will be set to "" to show that the File is 
          * missing and an Update is recommended.
          */
+        System.err.println(UpdaterUtil.getTime() + ": Version File not Found!");
         vers = "";    
       }
+      UpdaterUtil.log("installed version: " + vers);
       /*
        * Updates the Indicator with 3 and a Message, that the latest published Version is checked.
        * Increments index afterwards.
        */
+      UpdaterUtil.log("Checking latest published version...");
       updateIndicator(index, "Überprüfe aktuellste Version...");
       index++;
       /*
@@ -114,6 +124,7 @@ public class ProgressTask extends Task<Void> {
        * handles the updating-Progress.
        */
       CheckerTask task = new CheckerTask(updates, primary, this, index);
+      UpdaterUtil.log("starting CheckerTask");
       new Thread(task).start();
       new Thread(() -> {
         try {
@@ -143,9 +154,12 @@ public class ProgressTask extends Task<Void> {
        * primary Updater.
        */
       if (publishedVersion.equals("FAILED")) {
+        UpdaterUtil.log("Update failed!");
         primary.showUpdateFailed();
         return null;
       } else {
+        UpdaterUtil.log("latest published Version: " 
+            + publishedVersion);
         primary.setLatestVersion(publishedVersion);
       }
       
@@ -159,6 +173,7 @@ public class ProgressTask extends Task<Void> {
          * Updates the indicator with the maximum value and a Message, that no updates are needed. 
          * Afterwards, it calls primary.startWithoutUpdate to start the Launcher.
          */
+        UpdaterUtil.log("No update needed, latest Version installed!");
         updateIndicator(max, "Keine Updates nötig!");
         primary.startWithoutUpdate();;
       } else if (vers.equals("")) {
@@ -166,14 +181,15 @@ public class ProgressTask extends Task<Void> {
          * Updates the Message Label, to inform the User that no Version-File was found and an 
          * Update is recommended to maintain stability of the Application.
          */
-        updateLabel("Keine Versions-Datei gefunden. Update zur nächsten Version "
-                + "empfohlen!");
+        UpdaterUtil.log("Update needed, no valid Version file found!");
+        updateLabel("Keine Versions-Datei gefunden. Update zur nächsten Version empfohlen!");
         primary.showUpdateNeeded();
       } else if (olderVersions.contains(vers)) {
         /*
          * Updates the Message Label, to inform the User that a new Version was found and an Update 
          * is recommended.
          */
+        UpdaterUtil.log("Update needed, newer Version found!");
         updateLabel("Neue Version gefunden!");
         primary.showUpdateNeeded();
       } else {
@@ -181,7 +197,8 @@ public class ProgressTask extends Task<Void> {
          * Updates the Message Label, to inform the User that there was an Error when trying to 
          * check for an Update and an Update is recommended to maintain stability.
          */
-        System.out.println(olderVersions.toString() + " " + vers);
+        UpdaterUtil.log("Update needed, unchecked Error when "
+            + "updating!");
         updateLabel("Fehler beim Update!");
         primary.showUpdateNeeded();
       }
@@ -191,12 +208,14 @@ public class ProgressTask extends Task<Void> {
     /*
      * Updates the Progress with it's maximum value and stops the Task afterwards.
      */
+    UpdaterUtil.log("ProgressTask finished!");
     updateProgress(max, max);
     return null;
   }
   
   /**
    * Updates the ProgressIndicator with the given value and Text to be displayed.
+
    * @param value The Value, the Indicator will be updated with. The Percentage displayed will be 
    *      {@code (value/max)}
    * @param text  The Text, that will be displayed in the updates-Label below the Indicator.
@@ -223,6 +242,7 @@ public class ProgressTask extends Task<Void> {
   
   /**
    * Updates the Message Label with the given Text.
+
    * @param text  The Text to be shown to the User.
    * @since 1.0
    */
@@ -240,6 +260,7 @@ public class ProgressTask extends Task<Void> {
   
   /**
    * Sets the published Version String to the given String.
+
    * @param version The String, that will be set as publishedVersion.
    * @since 1.0
    */
@@ -249,6 +270,7 @@ public class ProgressTask extends Task<Void> {
   
   /**
    * Sets the older Version ArrayList to the given ArrayList.
+
    * @param olderVersions All older Version found as an ArrayList of Strings.
    * @since 1.0
    */

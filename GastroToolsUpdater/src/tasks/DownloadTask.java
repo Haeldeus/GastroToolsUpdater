@@ -17,14 +17,15 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.Label;
+import util.UpdaterUtil;
 
 /**
  * The Task, that will control the Download of the Launcher, if it should be updated or freshly 
  * downloaded.
+
  * @author Haeldeus
  * @version 1.0
  */
@@ -75,6 +76,7 @@ public class DownloadTask extends Task<Void> {
   
   /**
    * The Constructor for this Task. Sets all Fields to the given Parameters.
+
    * @param downloadUrl The URL to download the Launcher from.
    * @param file The File, where the Download will be stored in.
    * @param updates The Label, that will display Messages to the User.
@@ -99,12 +101,14 @@ public class DownloadTask extends Task<Void> {
      */
     String p = outputFile.getAbsolutePath().substring(0, 
         outputFile.getAbsolutePath().lastIndexOf(File.separator) + 1);
+    UpdaterUtil.log("File located in Folder " + p);
     
     /*
      * Saves the name of the Application to be downloaded as a String.
      */
     String name = outputFile.getAbsolutePath().substring(p.length(), 
         outputFile.getAbsolutePath().length());
+    UpdaterUtil.log("App Name: " + name);
     
     /*
      * Creates a new File, that will be used to create a temporary File, which will replace the old 
@@ -113,14 +117,17 @@ public class DownloadTask extends Task<Void> {
      */
     File tmpFile;
     if (outputFile.exists()) {
+      UpdaterUtil.log("Creating new temporary File");
       tmpFile = new File(p + name.replace(".jar", "(tmp).jar"));
     } else {
+      UpdaterUtil.log("No temporary File has to be created");
       tmpFile = outputFile;
     }
     /*
      * Creates a temporary Text-File at the saved path to make resuming the Download possible.
      */
     File f = new File(p + "tmp.txt");
+    UpdaterUtil.log("Creating temporary Text File");
     /*
      * Boolean Value, that will determine, if the current File has to be deleted or not.
      */
@@ -130,6 +137,7 @@ public class DownloadTask extends Task<Void> {
      * has to be compared to the version to be downloaded to ensure that the already existing part 
      * of the download is up to date.
      */
+    UpdaterUtil.log("Checking, if Text File already exists...");
     if (f.exists()) {
       try {
         /*
@@ -138,7 +146,9 @@ public class DownloadTask extends Task<Void> {
          * deleted (both are equal means no deletion, different means deletion of the File).
          */
         BufferedReader br = new BufferedReader(new FileReader(f));
-        deleteFile = !br.readLine().equals(version);
+        String readVers = br.readLine();
+        UpdaterUtil.log("TextFile exists, read Version is " + readVers);
+        deleteFile = !readVers.equals(version);
         br.close();
       } catch (IOException e) {
         /*
@@ -156,6 +166,7 @@ public class DownloadTask extends Task<Void> {
          * the version of the download is stored in.
          */
         BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+        UpdaterUtil.log("No TextFile exists, creating new File with Version " + version);
         deleteFile = true;
         bw.write(version);
         bw.close();
@@ -170,6 +181,7 @@ public class DownloadTask extends Task<Void> {
     }
     
     if (deleteFile) {
+      UpdaterUtil.log("Deleting File...");
       tmpFile.delete();
     }
     /*
@@ -182,6 +194,7 @@ public class DownloadTask extends Task<Void> {
      * downloads the Data from the URL.
      */
     //Change to outputFile if not working, for both methods!
+    UpdaterUtil.log("Starting Download!");
     URLConnection downloadFileConnection = addFileResumeFunctionality(downloadUrl, tmpFile);
     try {
       transferDataAndGetBytesDownloaded(downloadFileConnection, tmpFile);
@@ -206,18 +219,19 @@ public class DownloadTask extends Task<Void> {
        * Deletes the temporary File, where the version was stored, since it's not needed after 
        * completing the Download.
        */
+      UpdaterUtil.log("Deleting temporary Text File");
       f.delete();
       /*
        * Renames the downloaded File, to replace the older executable.
        */
       if (outputFile != tmpFile) {
+        UpdaterUtil.log("Replacing older File");
         outputFile.delete();
         tmpFile.renameTo(outputFile);
       }
       // Run a java application in a separate system process
       //Process proc = Runtime.getRuntime().exec("java -jar " + outputFile.getPath());
-      System.out.println("working dir: " + outputFile.getPath().substring(0, 
-          outputFile.getPath().lastIndexOf(File.separator)));
+      UpdaterUtil.log("Starting the Launcher...");
       Runtime.getRuntime().exec("java -jar " + outputFile.getPath(), null, 
           new File(outputFile.getPath().substring(0, outputFile.getPath()
               .lastIndexOf(File.separator))));
@@ -237,6 +251,7 @@ public class DownloadTask extends Task<Void> {
   /**
    * Downloads the File from the given URLConnection to the given outputFile. 
    * Also updates the Progress while doing so to be able to show this progress to the User.
+
    * @param downloadFileConnection  The URLConnection, the Data will be downloaded from.
    * @param outputFile  The File, where the Data will be stored in.
    * @return  The Size of the downloaded Data in bytes as a long.
@@ -250,6 +265,7 @@ public class DownloadTask extends Task<Void> {
      * Gets the path of the outputFile and checks the size of the File to enable resuming the 
      * Download.
      */
+    UpdaterUtil.log("Download File to " + outputFile.getAbsolutePath());
     Path p = Paths.get(outputFile.getAbsolutePath());
     long bytesDownloaded;
     if (Files.exists(p)) {
@@ -257,15 +273,20 @@ public class DownloadTask extends Task<Void> {
     } else {
       bytesDownloaded = 0;
     }
+    UpdaterUtil.log("bytesDownloaded is " + bytesDownloaded);
     startingLength = bytesDownloaded;
     /*
      * Updates the Progress (which is 0 / downloadLength). This is more or less just initializing 
      * the ProgressBar with it's Max value.
+     * In case there were some data Download prior by an other Instance of the Updater, the 
+     * Progress is updated with the downloaded Data's Size / downloadLength.
      */
     updateProgress(bytesDownloaded, downloadLength);
     /*
      * Tries to get the Input-Stream from the URLConnection and a new FileOutputStream to the 
      * OuputFile. Throws an IOException, if these can't be obtained/created.
+     * Since these Streams has to be closed after this block has finished, a try-with-resources 
+     * statement is used.
      */
     try (InputStream is = downloadFileConnection.getInputStream(); 
         OutputStream os = new FileOutputStream(outputFile, true)) {
@@ -308,6 +329,7 @@ public class DownloadTask extends Task<Void> {
           /*
            * If the Task was cancelled, this Loop will break and thus the Task will finish.
            */
+          UpdaterUtil.log("DownloadTask was cancelled!");
           break;
         }
       }
@@ -317,6 +339,7 @@ public class DownloadTask extends Task<Void> {
 
   /**
    * Updates the User about the estimated time remaining to download the Data.
+
    * @param bytesDownloaded The size of the Data downloaded so far.
    * @since 1.0
    */
@@ -391,6 +414,7 @@ public class DownloadTask extends Task<Void> {
   /**
    * Adds the Functionality to resume the Download to the File and calculates the Size of the 
    * Download.
+
    * @param downloadUrl The URL, that will be downloaded as a String.
    * @param outputFile  The File, the data will be saved in.
    * @return  A new URLConnection to the given URL with the ability to resume the download.
@@ -418,9 +442,10 @@ public class DownloadTask extends Task<Void> {
      */
     String pathS = outputFile.getPath().substring(0, 
         outputFile.getPath().lastIndexOf(File.separator) + 1);
+    UpdaterUtil.log("outputFile will be saved in " + pathS);
     
     /*
-     * Creates a new File, that describes the Path to the outputFile.
+     * Creates a new File, that describes the Path to the outputFile's Directory.
      */
     File path = new File(pathS);
     
@@ -436,17 +461,20 @@ public class DownloadTask extends Task<Void> {
      * the download.
      */
     HttpURLConnection httpFileConnection = (HttpURLConnection) downloadFileConnection;
+    UpdaterUtil.log("HttpUrlConnection established");
     /*
      * Creates a temporary HTTP URL Connection, that is needed to get the total Size of the Data.
      */
     HttpURLConnection tmpFileConn = (HttpURLConnection) new URI(downloadUrl).toURL()
         .openConnection();
+    UpdaterUtil.log("TmpFileConnection established");
     /*
      * Sets the RequestMethod of the temporary Connection and gets the Length of it's Content as a 
      * long.
      */
     tmpFileConn.setRequestMethod("GET");
     long fileLength = tmpFileConn.getContentLengthLong();
+    UpdaterUtil.log("FileLength to be downloaded is " + fileLength + "B");
     /*
      * Stores the Length of the Content in downloadLength and the length of the OutputFile in a new 
      * long to compare these two values.
@@ -454,6 +482,7 @@ public class DownloadTask extends Task<Void> {
     downloadLength = fileLength;
     long existingFileSize = outputFile.length();
 
+    UpdaterUtil.log("Existing File Size is " + existingFileSize + "B");
     /*
      * Checks, if the existing File's size is smaller than the Length of the File to be downloaded.
      * If yes, it requests the Download Range from there on, if not it updates the Progress to 

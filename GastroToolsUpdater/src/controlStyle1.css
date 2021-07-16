@@ -11,6 +11,7 @@
 }
 .progress-indicator > .determinate-indicator > .indicator {
 	-fx-background-color: black, black, black, #d3d3d3;
+	-fx-padding: 0.5px;
 }
 #text {
   -fx-fill: rgb(171,118,118);
