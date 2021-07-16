@@ -37,7 +37,7 @@ public class Updater extends Application {
   /**
    * The Version of this Updater. Only used to keep Track of the Progress at the Moment.
    */
-  public static final String version = "1.02";
+  public static final String version = "1.03";
   
   /**
    * The primary Stage, this Application is running on.
@@ -116,6 +116,7 @@ public class Updater extends Application {
      * Sets the ProgressIndicator as the Center Node of the BorderPane.
      */
     this.bp.setCenter(this.pi);
+    BorderPane.setMargin(pi, new Insets(10, 10, 10, 10));
     
     /*
      * Creates a new Label to display Update Messages and adds it to the Bottom of the Pane.
