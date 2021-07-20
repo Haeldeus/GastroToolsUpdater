@@ -125,18 +125,23 @@ public class DownloadTask extends Task<Void> {
      * will create a new temporary File, if no File exists, then newFile only references outputFile.
      */
     File tmpFile;
-    if (outputFile.exists()) {
-      UpdaterUtil.log("Creating new temporary File");
-      tmpFile = new File(p + name.replace(".jar", "(tmp).jar"));
-    } else {
-      UpdaterUtil.log("No temporary File has to be created");
-      tmpFile = outputFile;
-    }
     /*
      * Creates a temporary Text-File at the saved path to make resuming the Download possible.
      */
     File f = new File(p + "tmp.txt");
     UpdaterUtil.log("Creating temporary Text File");
+    if (outputFile.exists()) {
+      if (!f.exists()) {
+        UpdaterUtil.log("Creating new temporary File");
+        tmpFile = new File(p + name.replace(".jar", "(tmp).jar"));
+      } else {
+        UpdaterUtil.log("No new temporary File has to be created since download was cancelled");
+        tmpFile = outputFile;
+      }
+    } else {
+      UpdaterUtil.log("No temporary File has to be created");
+      tmpFile = outputFile;
+    }
     /*
      * Boolean Value, that will determine, if the current File has to be deleted or not.
      */
@@ -188,9 +193,10 @@ public class DownloadTask extends Task<Void> {
         e.printStackTrace();
       }
     }
-    
+
+    UpdaterUtil.log("temporary File has to be deleted? " + deleteFile);
     if (deleteFile) {
-      UpdaterUtil.log("Deleting temporary File if existing...");
+      UpdaterUtil.log("Deleting temporary File...");
       tmpFile.delete();
     }
     /*
