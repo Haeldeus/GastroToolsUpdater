@@ -11,8 +11,8 @@ import java.util.StringTokenizer;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.Label;
+import tool.LoggingTool;
 import updater.Updater;
-import util.UpdaterUtil;
 
 /**
  * The Task, that will check, if a new Version of the Launcher was released.
@@ -73,7 +73,7 @@ public class CheckerTask extends Task<Void> {
        * check for that File.
        */
       URL url = new URL("https://github.com/Haeldeus/CashAssetsLauncher/blob/master/version.txt");
-      UpdaterUtil.log("Reading text from: " + url.toString());
+      LoggingTool.log("Reading text from: " + url.toString());
       /*
        *  Get the input stream through URL Connection. If no connection can be established, an 
        *  IOException will be thrown, which is caught by the catch-Block below.
@@ -89,7 +89,7 @@ public class CheckerTask extends Task<Void> {
        * Updates the Frame, to show the Progress.
        */
       prt.updateIndicator(++index, "Verbindung hergestellt!");
-      UpdaterUtil.log("Connection to MainServer established");
+      LoggingTool.log("Connection to MainServer established");
     } catch (IOException e) {
       /*
        * Updates the User, that no connection was detected.
@@ -99,8 +99,8 @@ public class CheckerTask extends Task<Void> {
         public void run() {
           updates.setText("Keine Verbindung zum Server möglich. Bitte überprüfen Sie Ihre "
               + "Internetverbindung.");
-          UpdaterUtil.log("No Connection to the Server could be established!");
-          UpdaterUtil.logError("No Connection to the Server could be established!");
+          LoggingTool.log("No Connection to the Server could be established!");
+          LoggingTool.logError("No Connection to the Server could be established!");
         }        
       });
       /*
@@ -143,8 +143,8 @@ public class CheckerTask extends Task<Void> {
           Platform.runLater(new Runnable() {
             @Override
             public void run() {
-              UpdaterUtil.log("CheckerTask was cancelled due to timeout!");
-              UpdaterUtil.logError("CheckerTask was cancelled due to timeout!");
+              LoggingTool.log("CheckerTask was cancelled due to timeout!");
+              LoggingTool.logError("CheckerTask was cancelled due to timeout!");
               prt.setPublishedVersion("FAILED");
               updates.setText("Zeitüberschreitung!");
               primary.showUpdateFailed();
@@ -173,8 +173,8 @@ public class CheckerTask extends Task<Void> {
               Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                  UpdaterUtil.log("CheckerTask was cancelled due to timeout!");
-                  UpdaterUtil.logError("CheckerTask was cancelled due to timeout!");
+                  LoggingTool.log("CheckerTask was cancelled due to timeout!");
+                  LoggingTool.logError("CheckerTask was cancelled due to timeout!");
                   prt.setPublishedVersion("FAILED");
                   updates.setText("Zeitüberschreitung!");
                   primary.showUpdateFailed();
@@ -205,7 +205,7 @@ public class CheckerTask extends Task<Void> {
     } catch (IOException e) {
       e.printStackTrace();
     }
-    UpdaterUtil.log("Published Versions found! Splitting Info into suitable Strings...");
+    LoggingTool.log("Published Versions found! Splitting Info into suitable Strings...");
     /*
      * Updates the User, that the Version Details will be separated in the next step. 
      */
@@ -242,7 +242,7 @@ public class CheckerTask extends Task<Void> {
     /*
      * Updates the User, stores the created List in the parent Task and exits this Task.
      */
-    UpdaterUtil.log("Check for published Versions successful!");
+    LoggingTool.log("Check for published Versions successful!");
     prt.updateIndicator(++index, "Version überprüft.");
     prt.setOlderVersions(oldVersions);
     return null;

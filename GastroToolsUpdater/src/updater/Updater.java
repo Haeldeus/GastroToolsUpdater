@@ -23,7 +23,7 @@ import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import tasks.DownloadTask;
 import tasks.ProgressTask;
-import util.UpdaterUtil;
+import tool.LoggingTool;
 
 /**
  * The Updater MainClass. Here, the Frame will be configured and all other Tasks will be started 
@@ -37,7 +37,7 @@ public class Updater extends Application {
   /**
    * The Version of this Updater. Only used to keep Track of the Progress at the Moment.
    */
-  public static final String version = "1.04";
+  public static final String version = "1.05";
   
   /**
    * The primary Stage, this Application is running on.
@@ -78,12 +78,12 @@ public class Updater extends Application {
      */
     primaryStage.initStyle(StageStyle.UNDECORATED);
     primaryStage.getIcons().add(new Image("/res/GTIcon.png"));
-    UpdaterUtil.log("Version used: " + version);
+    LoggingTool.log("Version used: " + version);
     /*
      * Sets all immediately needed Fields to their default values.
      */
     file = new File(System.getProperty("user.dir") + "/app/Launcher.jar");
-    UpdaterUtil.log("Set new File to " + file.getAbsolutePath());
+    LoggingTool.log("Set new File to " + file.getAbsolutePath());
     this.primary = primaryStage;
     this.bp = new BorderPane();
     this.pi = new ProgressIndicator();
@@ -129,7 +129,7 @@ public class Updater extends Application {
      */
     ProgressTask pt = new ProgressTask(this, this.updaterLabel);
     this.pi.progressProperty().bind(pt.progressProperty());
-    UpdaterUtil.log("Starting UpdateTask");
+    LoggingTool.log("Starting UpdateTask");
     new Thread(pt).start();
   }
   
@@ -142,7 +142,7 @@ public class Updater extends Application {
    * @since 1.0
    */
   public void showUpdateFailed() {
-    UpdaterUtil.log("Update failed!");
+    LoggingTool.log("Update failed!");
     /*
      * Since all following instructions alter the Stage of the Application, this has to be done via 
      * a new Runnable.
@@ -207,7 +207,7 @@ public class Updater extends Application {
    * @since 1.0
    */
   public void showUpdateNeeded() {
-    UpdaterUtil.log("Update needed!");
+    LoggingTool.log("Update needed!");
     /*
      * Since all following instructions alter the Stage of the Application, this has to be done via 
      * a new Runnable.
@@ -268,7 +268,7 @@ public class Updater extends Application {
         btExit.setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent event) {
-            UpdaterUtil.log("Exiting the Application manually!");
+            LoggingTool.log("Exiting the Application manually!");
             System.exit(0);
           }
         });
@@ -286,7 +286,7 @@ public class Updater extends Application {
    * @since 1.0
    */
   private void startUpdate() {
-    UpdaterUtil.log("Starting to update the Launcher...");
+    LoggingTool.log("Starting to update the Launcher...");
     /*
      * Resets the BorderPane, since all former Nodes aren't needed in this step.
      */
@@ -310,7 +310,7 @@ public class Updater extends Application {
     /*
      * Creates the DownloadTask with the needed Parameters.
      */
-    UpdaterUtil.log("Creating new DownloadTask to download from: " 
+    LoggingTool.log("Creating new DownloadTask to download from: " 
         + "https://github.com/Haeldeus/GastroToolsLauncher/releases/download/v" + latestVersion 
         + "/Launcher.jar");
     DownloadTask task = 
@@ -335,7 +335,7 @@ public class Updater extends Application {
     /*
      * Starts the DownloadTask.
      */
-    UpdaterUtil.log("Starting DownloadTask");
+    LoggingTool.log("Starting DownloadTask");
     new Thread(task).start();
     /*
      * Adds a new EventHandler to the onCloseRequest to cancel the Update, when the User closes the 
@@ -360,7 +360,7 @@ public class Updater extends Application {
    */
   public void startWithoutUpdate() {
     try {
-      UpdaterUtil.log("Starting Launcher...");
+      LoggingTool.log("Starting Launcher...");
       /*
        *  Run a java application in a separate system process
        */
