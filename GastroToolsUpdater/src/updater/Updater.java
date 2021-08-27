@@ -37,7 +37,7 @@ public class Updater extends Application {
   /**
    * The Version of this Updater. Only used to keep Track of the Progress at the Moment.
    */
-  public static final String version = "1.05";
+  public static final String version = "1.06";
   
   /**
    * The primary Stage, this Application is running on.
@@ -69,6 +69,12 @@ public class Updater extends Application {
    */
   private String latestVersion;
   
+  /**
+   * The number of the Try to connect to the Server. This increases after each failed try 
+   * and the following retry to increase the timeout time.
+   */
+  private int iteration;
+  
   @Override
   public void start(Stage primaryStage) throws Exception {
     /*
@@ -78,19 +84,22 @@ public class Updater extends Application {
      */
     primaryStage.initStyle(StageStyle.UNDECORATED);
     primaryStage.getIcons().add(new Image("/res/GTIcon.png"));
-    LoggingTool.log("Version used: " + version);
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+        "Version used: " + version);
     /*
      * Sets all immediately needed Fields to their default values.
      */
     file = new File(System.getProperty("user.dir") + "/app/Launcher.jar");
-    LoggingTool.log("Set new File to " + file.getAbsolutePath());
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+        "Set new File to " + file.getAbsolutePath());
     this.primary = primaryStage;
     this.bp = new BorderPane();
     this.pi = new ProgressIndicator();
+    iteration = 1;
     /*
      * Starts the UpdateTask to check for new Updates for the Launcher.
      */
-    startUpdateTask();
+    startUpdateTask(iteration);
     /*
      * Sets the Size of the Scene, it's restrictions and the Stylesheet. Afterwards, it displays 
      * the primaryStage to the User.
@@ -108,10 +117,11 @@ public class Updater extends Application {
    * Starts the ProgressTask. That Task will check for Updates via a new CheckerTask and update the 
    * progressIndicator and updaterLabel.
 
+   * @param iteration The current try as an integer.
    * @see ProgressTask
    * @since 1.0
    */
-  private void startUpdateTask() {
+  private void startUpdateTask(int iteration) {
     /*
      * Sets the ProgressIndicator as the Center Node of the BorderPane.
      */
@@ -127,9 +137,10 @@ public class Updater extends Application {
     /*
      * Creates a new ProgressTask, binds the Indicator to it and starts it afterwards.
      */
-    ProgressTask pt = new ProgressTask(this, this.updaterLabel);
+    ProgressTask pt = new ProgressTask(this, this.updaterLabel, iteration);
     this.pi.progressProperty().bind(pt.progressProperty());
-    LoggingTool.log("Starting UpdateTask");
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+        "Starting UpdateTask");
     new Thread(pt).start();
   }
   
@@ -142,7 +153,8 @@ public class Updater extends Application {
    * @since 1.0
    */
   public void showUpdateFailed() {
-    LoggingTool.log("Update failed!");
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+        "Update failed!");
     /*
      * Since all following instructions alter the Stage of the Application, this has to be done via 
      * a new Runnable.
@@ -173,7 +185,8 @@ public class Updater extends Application {
             /*
              * Simply restarts the updateTask, since this resets the Stage and retries to update.
              */
-            startUpdateTask();
+            iteration++;
+            startUpdateTask(iteration);
           }          
         });
         grid.add(btRetry, 0, 1);
@@ -207,7 +220,7 @@ public class Updater extends Application {
    * @since 1.0
    */
   public void showUpdateNeeded() {
-    LoggingTool.log("Update needed!");
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "Update needed!");
     /*
      * Since all following instructions alter the Stage of the Application, this has to be done via 
      * a new Runnable.
@@ -268,7 +281,8 @@ public class Updater extends Application {
         btExit.setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent event) {
-            LoggingTool.log("Exiting the Application manually!");
+            LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+                "Exiting the Application manually!");
             System.exit(0);
           }
         });
@@ -286,7 +300,8 @@ public class Updater extends Application {
    * @since 1.0
    */
   private void startUpdate() {
-    LoggingTool.log("Starting to update the Launcher...");
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+        "Starting to update the Launcher...");
     /*
      * Resets the BorderPane, since all former Nodes aren't needed in this step.
      */
@@ -310,7 +325,8 @@ public class Updater extends Application {
     /*
      * Creates the DownloadTask with the needed Parameters.
      */
-    LoggingTool.log("Creating new DownloadTask to download from: " 
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+        "Creating new DownloadTask to download from: " 
         + "https://github.com/Haeldeus/GastroToolsLauncher/releases/download/v" + latestVersion 
         + "/Launcher.jar");
     DownloadTask task = 
@@ -335,7 +351,7 @@ public class Updater extends Application {
     /*
      * Starts the DownloadTask.
      */
-    LoggingTool.log("Starting DownloadTask");
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "Starting DownloadTask");
     new Thread(task).start();
     /*
      * Adds a new EventHandler to the onCloseRequest to cancel the Update, when the User closes the 
@@ -360,7 +376,7 @@ public class Updater extends Application {
    */
   public void startWithoutUpdate() {
     try {
-      LoggingTool.log("Starting Launcher...");
+      LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "Starting Launcher...");
       /*
        *  Run a java application in a separate system process
        */

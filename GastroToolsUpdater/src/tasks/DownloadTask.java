@@ -106,18 +106,19 @@ public class DownloadTask extends Task<Void> {
      */
     File path = new File(p);
     if (!path.exists()) {
-      LoggingTool.log("Creating Folder " + p.substring(p.substring(0, 
+      LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+          "Creating Folder " + p.substring(p.substring(0, 
           p.length() - 1).lastIndexOf(File.separator), p.length()));
       path.mkdirs();
     }
-    LoggingTool.log("File located in Folder " + p);
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "File located in Folder " + p);
     
     /*
      * Saves the name of the Application to be downloaded as a String.
      */
     String name = outputFile.getAbsolutePath().substring(p.length(), 
         outputFile.getAbsolutePath().length());
-    LoggingTool.log("App Name: " + name);
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "App Name: " + name);
     
     /*
      * Creates a new File, that will be used to create a temporary File, which will replace the old 
@@ -129,19 +130,29 @@ public class DownloadTask extends Task<Void> {
      * Creates a temporary Text-File at the saved path to make resuming the Download possible.
      */
     File f = new File(p + "tmp.txt");
-    LoggingTool.log("Creating temporary Text File");
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+        "Created temporary Text File at " + f.getPath());
     if (outputFile.exists()) {
       if (!f.exists()) {
-        LoggingTool.log("Creating new temporary File");
+        LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+            "Creating new temporary File at " + (p + name.replace(".jar", "(tmp).jar")));
         tmpFile = new File(p + name.replace(".jar", "(tmp).jar"));
       } else {
-        LoggingTool.log("No new temporary File has to be created since download was cancelled");
-        tmpFile = outputFile;
+        LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+            "No new temporary File has to be created since download was cancelled!");
+        if (new File(p + name.replace(".jar", "(tmp).jar")).exists()) {
+          tmpFile = new File(p + name.replace(".jar", "(tmp).jar"));
+        } else {
+          tmpFile = outputFile;
+        }
       }
     } else {
-      LoggingTool.log("No temporary File has to be created");
+      LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+          "No temporary File has to be created");
       tmpFile = outputFile;
     }
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+        "Downloading into File: " + tmpFile.getPath());
     /*
      * Boolean Value, that will determine, if the current File has to be deleted or not.
      */
@@ -151,7 +162,8 @@ public class DownloadTask extends Task<Void> {
      * has to be compared to the version to be downloaded to ensure that the already existing part 
      * of the download is up to date.
      */
-    LoggingTool.log("Checking, if Text File already exists...");
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+        "Checking, if Text File already exists...");
     if (f.exists()) {
       try {
         /*
@@ -161,7 +173,8 @@ public class DownloadTask extends Task<Void> {
          */
         BufferedReader br = new BufferedReader(new FileReader(f));
         String readVers = br.readLine();
-        LoggingTool.log("TextFile exists, read Version is " + readVers);
+        LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+            "TextFile exists, read Version is " + readVers);
         deleteFile = !readVers.equals(version);
         br.close();
       } catch (IOException e) {
@@ -180,7 +193,8 @@ public class DownloadTask extends Task<Void> {
          * the version of the download is stored in.
          */
         BufferedWriter bw = new BufferedWriter(new FileWriter(f));
-        LoggingTool.log("No TextFile exists, creating new File with Version " + version);
+        LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+            "No TextFile exists, creating new File with Version " + version);
         deleteFile = true;
         bw.write(version);
         bw.close();
@@ -194,9 +208,10 @@ public class DownloadTask extends Task<Void> {
       }
     }
 
-    LoggingTool.log("temporary File has to be deleted? " + deleteFile);
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+        "Temporary File has to be deleted? " + deleteFile);
     if (deleteFile) {
-      LoggingTool.log("Deleting temporary File...");
+      LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "Deleting temporary File...");
       tmpFile.delete();
     }
     /*
@@ -209,7 +224,8 @@ public class DownloadTask extends Task<Void> {
      * downloads the Data from the URL.
      */
     //Change to outputFile if not working, for both methods!
-    LoggingTool.log("Starting Download!");
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+        "Starting Download to " + tmpFile.getPath());
     URLConnection downloadFileConnection = addFileResumeFunctionality(downloadUrl, tmpFile);
     try {
       transferDataAndGetBytesDownloaded(downloadFileConnection, tmpFile);
@@ -222,6 +238,8 @@ public class DownloadTask extends Task<Void> {
      * and returns null in that case to stop the further execution of the Task.
      */
     if (isCancelled()) {
+      LoggingTool.logError(getClass(), LoggingTool.getLineNumber(), "Download Cancelled!");
+      LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "Download Cancelled!");
       return null;
     }
 
@@ -234,19 +252,19 @@ public class DownloadTask extends Task<Void> {
        * Deletes the temporary File, where the version was stored, since it's not needed after 
        * completing the Download.
        */
-      LoggingTool.log("Deleting temporary Text File");
+      LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "Deleting temporary Text File...");
       f.delete();
       /*
        * Renames the downloaded File, to replace the older executable.
        */
       if (outputFile != tmpFile) {
-        LoggingTool.log("Replacing older File");
+        LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "Replacing older File");
         outputFile.delete();
         tmpFile.renameTo(outputFile);
       }
       // Run a java application in a separate system process
       //Process proc = Runtime.getRuntime().exec("java -jar " + outputFile.getPath());
-      LoggingTool.log("Starting the Launcher...");
+      LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "Starting the Launcher...");
       Runtime.getRuntime().exec("java -jar " + outputFile.getPath(), null, 
           new File(outputFile.getPath().substring(0, outputFile.getPath()
               .lastIndexOf(File.separator))));
@@ -280,7 +298,8 @@ public class DownloadTask extends Task<Void> {
      * Gets the path of the outputFile and checks the size of the File to enable resuming the 
      * Download.
      */
-    LoggingTool.log("Download File to " + outputFile.getAbsolutePath());
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+        "Download File to " + outputFile.getAbsolutePath());
     Path p = Paths.get(outputFile.getAbsolutePath());
     long bytesDownloaded;
     if (Files.exists(p)) {
@@ -288,7 +307,8 @@ public class DownloadTask extends Task<Void> {
     } else {
       bytesDownloaded = 0;
     }
-    LoggingTool.log("bytesDownloaded is " + bytesDownloaded);
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+        "bytesDownloaded is " + bytesDownloaded);
     startingLength = bytesDownloaded;
     /*
      * Updates the Progress (which is 0 / downloadLength). This is more or less just initializing 
@@ -344,7 +364,7 @@ public class DownloadTask extends Task<Void> {
           /*
            * If the Task was cancelled, this Loop will break and thus the Task will finish.
            */
-          LoggingTool.log("DownloadTask was cancelled!");
+          LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "DownloadTask was cancelled!");
           break;
         }
       }
@@ -361,7 +381,7 @@ public class DownloadTask extends Task<Void> {
   private void update(long bytesDownloaded) {
     /*
      * Since the download might start with an existing File, the size of this existing File must be 
-     * subtraced from the current File size, that is bytesDownloaded to ensure correct values for 
+     * subtracted from the current File size, that is bytesDownloaded to ensure correct values for 
      * performance.
      */
     bytesDownloaded -= startingLength;
@@ -457,7 +477,8 @@ public class DownloadTask extends Task<Void> {
      */
     String pathS = outputFile.getPath().substring(0, 
         outputFile.getPath().lastIndexOf(File.separator) + 1);
-    LoggingTool.log("outputFile will be saved in " + pathS);
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+        "outputFile will be saved in " + pathS);
     
     /*
      * Creates a new File, that describes the Path to the outputFile's Directory.
@@ -476,20 +497,21 @@ public class DownloadTask extends Task<Void> {
      * the download.
      */
     HttpURLConnection httpFileConnection = (HttpURLConnection) downloadFileConnection;
-    LoggingTool.log("HttpUrlConnection established");
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "HttpUrlConnection established");
     /*
      * Creates a temporary HTTP URL Connection, that is needed to get the total Size of the Data.
      */
     HttpURLConnection tmpFileConn = (HttpURLConnection) new URI(downloadUrl).toURL()
         .openConnection();
-    LoggingTool.log("TmpFileConnection established");
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "TmpFileConnection established");
     /*
      * Sets the RequestMethod of the temporary Connection and gets the Length of it's Content as a 
      * long.
      */
     tmpFileConn.setRequestMethod("GET");
     long fileLength = tmpFileConn.getContentLengthLong();
-    LoggingTool.log("FileLength to be downloaded is " + fileLength + "B");
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+        "FileLength to be downloaded is " + fileLength + "B");
     /*
      * Stores the Length of the Content in downloadLength and the length of the OutputFile in a new 
      * long to compare these two values.
@@ -497,7 +519,8 @@ public class DownloadTask extends Task<Void> {
     downloadLength = fileLength;
     long existingFileSize = outputFile.length();
 
-    LoggingTool.log("Existing File Size is " + existingFileSize + "B");
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+        "Existing File Size is " + existingFileSize + "B");
     /*
      * Checks, if the existing File's size is smaller than the Length of the File to be downloaded.
      * If yes, it requests the Download Range from there on, if not it updates the Progress to 

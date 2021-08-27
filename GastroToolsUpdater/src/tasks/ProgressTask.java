@@ -53,15 +53,23 @@ public class ProgressTask extends Task<Void> {
   private int index;
   
   /**
+   * The amount of ms, before this Task gets a timeout. This is based on the amount of tries, 
+   * the Updater tried to reach the Server and a base 5 seconds from the beginning.
+   */
+  private int timeout;
+  
+  /**
    * The Constructor for this Task. Sets all immediately needed Fields to the given Values.
 
    * @param primary The Updater, which called this Task.
    * @param updates The Label, that will display update Message to the User.
+   * @param iteration The current try to reach the Server.
    * @since 1.0
    */
-  public ProgressTask(Updater primary, Label updates) {
+  public ProgressTask(Updater primary, Label updates, int iteration) {
     this.updates = updates;
     this.primary = primary;
+    this.timeout = iteration * 5000;
     max = 10;
     index = 1;
   }
@@ -72,7 +80,7 @@ public class ProgressTask extends Task<Void> {
      * Updates the Indicator with 1 and a Message, that the Files needed are loading. Increments 
      * index afterwards.
      */
-    LoggingTool.log("Loading Files...");
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "Loading Files...");
     updateIndicator(index, "Lade Dateien...");
     index++;
     /*
@@ -81,14 +89,14 @@ public class ProgressTask extends Task<Void> {
      */
     String versionPath = System.getProperty("user.dir").concat(File.separator + "app" 
         + File.separator + "Version.txt");
-    LoggingTool.log("versionFile at " + versionPath);
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "versionFile at " + versionPath);
     File version = new File(versionPath);
     try {
       /*
        * Updates the Indicator with 2 and a Message, that the currently installed Version is 
        * checked. Increments index afterwards.
        */
-      LoggingTool.log("Checking installed Version...");
+      LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "Checking installed Version...");
       updateIndicator(index, "Überprüfe installierte Version...");
       index++;
       /*
@@ -111,12 +119,13 @@ public class ProgressTask extends Task<Void> {
         System.err.println(LoggingTool.getTime() + ": Version File not Found!");
         vers = "";    
       }
-      LoggingTool.log("installed version: " + vers);
+      LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "installed version: " + vers);
       /*
        * Updates the Indicator with 3 and a Message, that the latest published Version is checked.
        * Increments index afterwards.
        */
-      LoggingTool.log("Checking latest published version...");
+      LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+          "Checking latest published version...");
       updateIndicator(index, "Überprüfe aktuellste Version...");
       index++;
       /*
@@ -124,11 +133,12 @@ public class ProgressTask extends Task<Void> {
        * handles the updating-Progress.
        */
       CheckerTask task = new CheckerTask(updates, primary, this, index);
-      LoggingTool.log("starting CheckerTask");
+      LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+          "starting CheckerTask, timeout is: " + timeout + " ms");
       new Thread(task).start();
       new Thread(() -> {
         try {
-          Thread.sleep(5000);  
+          Thread.sleep(timeout);  
         } catch (InterruptedException e) {
           //Testing Purposes, shouldn't be called.
           e.printStackTrace();
@@ -154,11 +164,11 @@ public class ProgressTask extends Task<Void> {
        * primary Updater.
        */
       if (publishedVersion.equals("FAILED")) {
-        LoggingTool.log("Update failed!");
+        LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "Update failed!");
         primary.showUpdateFailed();
         return null;
       } else {
-        LoggingTool.log("latest published Version: " 
+        LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "latest published Version: " 
             + publishedVersion);
         primary.setLatestVersion(publishedVersion);
       }
@@ -173,7 +183,8 @@ public class ProgressTask extends Task<Void> {
          * Updates the indicator with the maximum value and a Message, that no updates are needed. 
          * Afterwards, it calls primary.startWithoutUpdate to start the Launcher.
          */
-        LoggingTool.log("No update needed, latest Version installed!");
+        LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+            "No update needed, latest Version installed!");
         updateIndicator(max, "Keine Updates nötig!");
         primary.startWithoutUpdate();;
       } else if (vers.equals("")) {
@@ -181,7 +192,8 @@ public class ProgressTask extends Task<Void> {
          * Updates the Message Label, to inform the User that no Version-File was found and an 
          * Update is recommended to maintain stability of the Application.
          */
-        LoggingTool.log("Update needed, no valid Version file found!");
+        LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+            "Update needed, no valid Version file found!");
         updateLabel("Keine Versions-Datei gefunden. Update zur nächsten Version empfohlen!");
         primary.showUpdateNeeded();
       } else if (olderVersions.contains(vers)) {
@@ -189,7 +201,8 @@ public class ProgressTask extends Task<Void> {
          * Updates the Message Label, to inform the User that a new Version was found and an Update 
          * is recommended.
          */
-        LoggingTool.log("Update needed, newer Version found!");
+        LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+            "Update needed, newer Version found!");
         updateLabel("Neue Version gefunden!");
         primary.showUpdateNeeded();
       } else {
@@ -197,8 +210,8 @@ public class ProgressTask extends Task<Void> {
          * Updates the Message Label, to inform the User that there was an Error when trying to 
          * check for an Update and an Update is recommended to maintain stability.
          */
-        LoggingTool.log("Update needed, unchecked Error when "
-            + "updating!");
+        LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+            "Update needed, unchecked Error when updating!");
         updateLabel("Fehler beim Update!");
         primary.showUpdateNeeded();
       }
@@ -208,7 +221,7 @@ public class ProgressTask extends Task<Void> {
     /*
      * Updates the Progress with it's maximum value and stops the Task afterwards.
      */
-    LoggingTool.log("ProgressTask finished!");
+    LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "ProgressTask finished!");
     updateProgress(max, max);
     return null;
   }
