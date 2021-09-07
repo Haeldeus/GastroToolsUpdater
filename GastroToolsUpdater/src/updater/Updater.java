@@ -21,6 +21,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
+import settingstool.SettingsTool;
 import tasks.DownloadTask;
 import tasks.ProgressTask;
 import tool.LoggingTool;
@@ -37,7 +38,7 @@ public class Updater extends Application {
   /**
    * The Version of this Updater. Only used to keep Track of the Progress at the Moment.
    */
-  public static final String version = "1.06";
+  public static final String version = "1.07";
   
   /**
    * The primary Stage, this Application is running on.
@@ -75,8 +76,14 @@ public class Updater extends Application {
    */
   private int iteration;
   
+  /**
+   * The SettingsTool to read/write from/to the Settings File.
+   */
+  private SettingsTool settings;
+  
   @Override
   public void start(Stage primaryStage) throws Exception {
+    settings = new SettingsTool();
     /*
      * Makes the Window that will display this Scene undecorated, so there is no OS-Border. 
      * Also adds the Icon of this Application, so it can be displayed in the Task Bar instead of 
@@ -109,7 +116,7 @@ public class Updater extends Application {
     primary.setScene(scene);
     primary.setMinHeight(270);
     primary.setMinWidth(620);
-    primary.setTitle("GastroTools Updater");
+    primary.setTitle("GastroTools Updater v" + version);
     primary.show();
   }
 
@@ -137,7 +144,7 @@ public class Updater extends Application {
     /*
      * Creates a new ProgressTask, binds the Indicator to it and starts it afterwards.
      */
-    ProgressTask pt = new ProgressTask(this, this.updaterLabel, iteration);
+    ProgressTask pt = new ProgressTask(this, this.updaterLabel, iteration, settings);
     this.pi.progressProperty().bind(pt.progressProperty());
     LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
         "Starting UpdateTask");
@@ -287,6 +294,10 @@ public class Updater extends Application {
           }
         });
         grid.add(btExit, 2, 1);
+        
+        /*
+         * Adds the Grid to the Pane.
+         */
         grid.setAlignment(Pos.CENTER);
         bp.setCenter(grid);
       }      

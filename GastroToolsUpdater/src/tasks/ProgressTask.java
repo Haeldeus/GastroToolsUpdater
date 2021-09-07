@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.Label;
+import settingstool.Settings;
+import settingstool.SettingsTool;
 import tool.LoggingTool;
 import updater.Updater;
 
@@ -64,12 +66,13 @@ public class ProgressTask extends Task<Void> {
    * @param primary The Updater, which called this Task.
    * @param updates The Label, that will display update Message to the User.
    * @param iteration The current try to reach the Server.
+   * @param settings  The SettingsTool to read the Settings File.
    * @since 1.0
    */
-  public ProgressTask(Updater primary, Label updates, int iteration) {
+  public ProgressTask(Updater primary, Label updates, int iteration, SettingsTool settings) {
     this.updates = updates;
     this.primary = primary;
-    this.timeout = iteration * 5000;
+    this.timeout = iteration * Integer.parseInt(settings.getValue(Settings.timeout));
     max = 10;
     index = 1;
   }

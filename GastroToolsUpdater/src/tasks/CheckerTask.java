@@ -175,6 +175,10 @@ public class CheckerTask extends Task<Void> {
            * Remove HTML-Code from the String.
            */
           while (line.contains(">")) {
+            /*
+             * Checks, if the Task was cancelled. If yes, sets older and published Versions to 
+             * their Failed-States and exits the Task.
+             */
             if (isCancelled()) {
               Platform.runLater(new Runnable() {
                 @Override

@@ -132,20 +132,44 @@ public class DownloadTask extends Task<Void> {
     File f = new File(p + "tmp.txt");
     LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
         "Created temporary Text File at " + f.getPath());
+    /*
+     * If the OutputFile already exists, it has to be checked, if it contains the correct Version 
+     * or if an older Version was downloaded. Also, if no temporary File exists, the OutputFile is 
+     * a fully downloaded older Version, which will be replaced by this Task.
+     */
     if (outputFile.exists()) {
+      /*
+       * If the temporary File doesn't exist, a new download was started, since outputFile is an 
+       * older Version of the Application and thus has to be replaced after the download, but not 
+       * beforehand.
+       */
       if (!f.exists()) {
         LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
             "Creating new temporary File at " + (p + name.replace(".jar", "(tmp).jar")));
         tmpFile = new File(p + name.replace(".jar", "(tmp).jar"));
+        /*
+         * If the temporary File exists, then a downloadTask was cancelled before since it couldn't 
+         * delete the temporary File after completion. Therefore, to continue the download, the 
+         * correct File has to be used.
+         */
       } else {
         LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
             "No new temporary File has to be created since download was cancelled!");
+        /*
+         * If the (tmp)-File exists, it has to be used to continue the download. If not, the first 
+         * download of the Application was cancelled, since the incomplete download is saved in 
+         * "appname.jar", so this File has to be used and not a temporary one.
+         */
         if (new File(p + name.replace(".jar", "(tmp).jar")).exists()) {
           tmpFile = new File(p + name.replace(".jar", "(tmp).jar"));
         } else {
           tmpFile = outputFile;
         }
       }
+      /*
+       * If no outputFile exists, this Task is the first donwload of the Application and thus can 
+       * directly download into outputFile.
+       */
     } else {
       LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
           "No temporary File has to be created");
@@ -208,6 +232,9 @@ public class DownloadTask extends Task<Void> {
       }
     }
 
+    /*
+     * Deletes the temporary File from the Drive.
+     */
     LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
         "Temporary File has to be deleted? " + deleteFile);
     if (deleteFile) {
@@ -223,7 +250,6 @@ public class DownloadTask extends Task<Void> {
      * Opens a URLConnection to the given URL, adds functionality to resume the download and 
      * downloads the Data from the URL.
      */
-    //Change to outputFile if not working, for both methods!
     LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
         "Starting Download to " + tmpFile.getPath());
     URLConnection downloadFileConnection = addFileResumeFunctionality(downloadUrl, tmpFile);
