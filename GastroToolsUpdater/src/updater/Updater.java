@@ -4,8 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -15,12 +18,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
+import settingstool.Settings;
 import settingstool.SettingsTool;
 import tasks.DownloadTask;
 import tasks.ProgressTask;
@@ -38,7 +44,7 @@ public class Updater extends Application {
   /**
    * The Version of this Updater. Only used to keep Track of the Progress at the Moment.
    */
-  public static final String version = "1.07";
+  public static final String version = "1.1";
   
   /**
    * The primary Stage, this Application is running on.
@@ -181,14 +187,61 @@ public class Updater extends Application {
         /*
          * Adds the Updater Label to the Grid.
          */
-        grid.add(updaterLabel, 0, 0, 2, 1);
+        grid.add(updaterLabel, 0, 0, 3, 1);
         /*
          * Creates a new Button to retry updating and adds it to the Grid.
          */
         Button btRetry = new Button("Wiederholen" + System.lineSeparator() + "(Empfohlen)");
+        btRetry.setPrefSize(131, 36);
+        grid.add(btRetry, 0, 1);
+        
+        /*
+         * Creates a new GridPane, where the User can edit the timeout limit.
+         */
+        GridPane timeoutPane = new GridPane();
+        
+        /*
+         * Creates a Label, that explains the User that he can edit the Timeout in the TextField
+         * below.
+         */
+        Label lbTimeout = new Label("Zeitgrenze:");
+        timeoutPane.add(lbTimeout, 0, 0);
+        
+        /*
+         * Creates a TextField, where the User can enter a new Timeout manually without editing the 
+         * Settings File or waiting until the Iterations are enough to increase the Timeout to the 
+         * needed amount.
+         */
+        TextField tfTimeout = new TextField(settings.getValue(Settings.timeout));
+        /*
+         * Adds a Listener that will remove non-Digits from the Text.
+         */
+        tfTimeout.textProperty().addListener(new ChangeListener<String>() {
+          @Override
+          public void changed(ObservableValue<? extends String> observable, 
+              String oldValue, String newValue) { 
+            tfTimeout.setText(newValue.replaceAll("\\D", ""));
+          }
+        });
+        tfTimeout.setMaxWidth(75);
+        timeoutPane.add(tfTimeout, 0, 1);
+        
+        /*
+         * Adds a Handler to the Button, that will be called when pressing it.
+         */
         btRetry.setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent arg0) {
+            /*
+             * If the timeout was changed, this change is entered into the Settings File and the 
+             * iterations are reset. Afterwards, they get increased from 1 again.
+             */
+            if (!settings.getValue(Settings.timeout).equals(tfTimeout.getText())) {
+              HashMap<Settings, String> map = new HashMap<Settings, String>();
+              map.put(Settings.timeout, tfTimeout.getText());
+              settings.setValues(map);
+              iteration = 0;
+            }
             /*
              * Simply restarts the updateTask, since this resets the Stage and retries to update.
              */
@@ -196,7 +249,21 @@ public class Updater extends Application {
             startUpdateTask(iteration);
           }          
         });
-        grid.add(btRetry, 0, 1);
+        
+        /*
+         * Creates a Label, that shows the Unit of the Timeout.
+         */
+        Label lbMilliSeconds = new Label("ms");
+        lbMilliSeconds.textAlignmentProperty().set(TextAlignment.LEFT);
+        timeoutPane.add(lbMilliSeconds, 1, 1);
+        
+        /*
+         * If multiple Tries to connect to the Server failed, the User can increase the Timeout 
+         * manually.
+         */
+        if (iteration >= 3) {
+          grid.add(timeoutPane, 0, 2);
+        }
         
         /*
          * Creates a new Button to ignore the problem and starts the Launcher without updating.
@@ -214,6 +281,22 @@ public class Updater extends Application {
           }
         });
         grid.add(btStart, 1, 1);
+        
+        /*
+         * Creates a Button to exit the Application.
+         */
+        Button btExit = new Button("Beenden");
+        btExit.setOnAction(new EventHandler<ActionEvent>() {
+          @Override
+          public void handle(ActionEvent event) {
+            LoggingTool.log(getClass(), LoggingTool.getLineNumber(), 
+                "Exiting the Application manually!");
+            System.exit(0);
+          }
+        });
+        btExit.setPrefSize(131, 36);
+        grid.add(btExit, 2, 1);
+        
         grid.setAlignment(Pos.CENTER);
         bp.setCenter(grid);
       }      
@@ -418,6 +501,9 @@ public class Updater extends Application {
    */
   public static void main(String[] args) {
     try {
+      /*
+       * Creates the LogFiles, where Information and Errors can be written in.
+       */
       String path = Paths.get("").toAbsolutePath().toString();
       path = path.concat(File.separator + "Logs" + File.separator);
       File f = new File(path);
@@ -427,6 +513,9 @@ public class Updater extends Application {
     } catch (Exception e) {
       e.printStackTrace();
     }
+    /*
+     * Launches the Updater.
+     */
     Updater.launch(args);
   }
 }
