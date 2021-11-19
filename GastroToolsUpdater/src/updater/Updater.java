@@ -44,7 +44,7 @@ public class Updater extends Application {
   /**
    * The Version of this Updater. Only used to keep Track of the Progress at the Moment.
    */
-  public static final String version = "1.1";
+  public static final String version = "1.2";
   
   /**
    * The primary Stage, this Application is running on.

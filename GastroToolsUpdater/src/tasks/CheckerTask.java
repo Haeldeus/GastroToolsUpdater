@@ -72,7 +72,7 @@ public class CheckerTask extends Task<Void> {
        * Since the Launcher's Version File will always be at the same location, this is a static 
        * check for that File.
        */
-      URL url = new URL("https://github.com/Haeldeus/CashAssetsLauncher/blob/master/version.txt");
+      URL url = new URL("https://github.com/Haeldeus/CashAssetsLauncher/blob/main/version.txt");
       LoggingTool.log(getClass(), LoggingTool.getLineNumber(), "Reading text from: " 
           + url.toString());
       /*
