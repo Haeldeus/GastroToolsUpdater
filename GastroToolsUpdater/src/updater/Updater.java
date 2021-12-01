@@ -26,11 +26,11 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
+import loggingtool.LoggingTool;
 import settingstool.Settings;
 import settingstool.SettingsTool;
 import tasks.DownloadTask;
 import tasks.ProgressTask;
-import tool.LoggingTool;
 
 /**
  * The Updater MainClass. Here, the Frame will be configured and all other Tasks will be started 
@@ -44,7 +44,7 @@ public class Updater extends Application {
   /**
    * The Version of this Updater. Only used to keep Track of the Progress at the Moment.
    */
-  public static final String version = "1.2";
+  public static final String version = "1.21";
   
   /**
    * The primary Stage, this Application is running on.

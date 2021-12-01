@@ -11,7 +11,7 @@ import java.util.StringTokenizer;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.Label;
-import tool.LoggingTool;
+import loggingtool.LoggingTool;
 import updater.Updater;
 
 /**

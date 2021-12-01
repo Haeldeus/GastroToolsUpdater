@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.Label;
+import loggingtool.LoggingTool;
 import settingstool.Settings;
 import settingstool.SettingsTool;
-import tool.LoggingTool;
 import updater.Updater;
 
 /**

@@ -20,7 +20,7 @@ import java.nio.file.Paths;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.Label;
-import tool.LoggingTool;
+import loggingtool.LoggingTool;
 
 /**
  * The Task, that will control the Download of the Launcher, if it should be updated or freshly 

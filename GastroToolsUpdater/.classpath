@@ -10,7 +10,6 @@
 	<classpathentry exported="true" kind="lib" path="libs/javafx/javafx.media.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/javafx/javafx.swing.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/javafx/javafx.web.jar"/>
-	<classpathentry kind="lib" path="libs/LoggingTool.jar"/>
-	<classpathentry kind="lib" path="libs/SettingsHandler.jar"/>
+	<classpathentry kind="lib" path="libs/GastroUtils.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
